@@ -250,7 +250,7 @@ class _ResourcesScreenState extends State<ResourcesScreen> with TickerProviderSt
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.8,
+                childAspectRatio: 0.75, // Increased from 0.8 to give more height
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
               ),
@@ -284,7 +284,7 @@ class _ResourcesScreenState extends State<ResourcesScreen> with TickerProviderSt
         children: [
           // Header with icon
           Container(
-            height: 60,
+            height: 50, // Reduced from 60 to save space
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -300,28 +300,29 @@ class _ResourcesScreenState extends State<ResourcesScreen> with TickerProviderSt
             ),
             child: Row(
               children: [
-                const SizedBox(width: 16),
+                const SizedBox(width: 12), // Reduced padding
                 Icon(
                   _getCategoryIcon(resource['category']),
                   color: _getCategoryColor(resource['category']),
-                  size: 24,
+                  size: 20, // Reduced from 24
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), // Reduced padding
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     resource['type'],
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: _getCategoryColor(resource['category']),
                       fontWeight: FontWeight.w600,
+                      fontSize: 10, // Smaller text
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12), // Reduced padding
               ],
             ),
           ),
@@ -329,7 +330,7 @@ class _ResourcesScreenState extends State<ResourcesScreen> with TickerProviderSt
           // Content
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12), // Reduced from 16
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -338,50 +339,56 @@ class _ResourcesScreenState extends State<ResourcesScreen> with TickerProviderSt
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: AppColors.textDark,
                       fontWeight: FontWeight.w600,
+                      fontSize: 13, // Slightly smaller
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6), // Reduced spacing
                   Expanded(
                     child: Text(
                       resource['description'],
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.textMedium,
+                        fontSize: 11, // Smaller text
                       ),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8), // Reduced spacing
                   
                   // Footer with duration and difficulty
                   Row(
                     children: [
                       Icon(
                         Icons.access_time,
-                        size: 14,
+                        size: 12, // Smaller icon
                         color: AppColors.textLight,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        resource['duration'],
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textLight,
+                      const SizedBox(width: 3), // Reduced spacing
+                      Flexible(
+                        child: Text(
+                          resource['duration'],
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textLight,
+                            fontSize: 10, // Smaller text
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1), // Reduced padding
                         decoration: BoxDecoration(
                           color: _getDifficultyColor(resource['difficulty']).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(3), // Smaller radius
                         ),
                         child: Text(
                           resource['difficulty'],
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: _getDifficultyColor(resource['difficulty']),
-                            fontSize: 10,
+                            fontSize: 9, // Smaller text
                           ),
                         ),
                       ),

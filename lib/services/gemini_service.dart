@@ -35,11 +35,27 @@ class GeminiService {
       final content = [Content.text(prompt)];
       final response = await _model!.generateContent(content);
       
-      return response.text ?? 'I\'m here to listen and support you. Could you tell me more about how you\'re feeling?';
+      return response.text ?? _getFallbackResponse(userMessage);
     } catch (e) {
       print('Error generating Gemini response: $e');
+      // Check if it's a network error and provide specific fallback
+      if (e.toString().contains('SocketException') || e.toString().contains('Failed host lookup')) {
+        return _getNetworkErrorResponse(userMessage);
+      }
       return _getFallbackResponse(userMessage);
     }
+  }
+
+  // Network-specific fallback response
+  static String _getNetworkErrorResponse(String userMessage) {
+    final networkResponses = [
+      "I'm having trouble connecting to my knowledge base right now, but I'm still here with you. Sometimes when I can't access my full capabilities, it's a good reminder that the most important thing is that you're not alone. How can I support you in this moment?",
+      "My connection seems to be having issues, but that doesn't change the fact that your feelings matter and I want to help. While I work on reconnecting, would you like to try a simple breathing exercise together?",
+      "I'm experiencing some technical difficulties, but please know that reaching out was brave and important. Even without my full resources, I can still offer you this: you are valued, your struggles are valid, and this difficult moment will pass.",
+      "Despite my connection issues, I want you to know I'm genuinely glad you're here. Sometimes the most healing thing we can do is simply acknowledge what we're feeling. What's the strongest emotion you're experiencing right now?",
+    ];
+    
+    return networkResponses[DateTime.now().millisecondsSinceEpoch % networkResponses.length];
   }
 
   // Build mental health focused prompt

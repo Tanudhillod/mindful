@@ -1,28 +1,60 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../models/community_models.dart';
 import 'moderation_service.dart';
 
 class CommunityService {
-  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static FirebaseFirestore? get _firestore {
+    try {
+      return FirebaseFirestore.instance;
+    } catch (e) {
+      print('Firebase not initialized: $e');
+      return null;
+    }
+  }
+  
+  static FirebaseAuth? get _auth {
+    try {
+      return FirebaseAuth.instance;
+    } catch (e) {
+      print('Firebase Auth not initialized: $e');
+      return null;
+    }
+  }
+  
   static const String _messagesCollection = 'community_messages';
   static const String _usersCollection = 'community_users';
   static const String _reactionsCollection = 'message_reactions';
 
+  // Check if Firebase is available
+  static bool get isFirebaseAvailable {
+    try {
+      Firebase.apps.isNotEmpty;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   // Initialize community user if not exists
   static Future<CommunityUser?> initializeCommunityUser() async {
     try {
-      final currentUser = _auth.currentUser;
+      if (!isFirebaseAvailable || _auth == null || _firestore == null) {
+        print('Firebase not available, skipping community user initialization');
+        return null;
+      }
+      
+      final currentUser = _auth!.currentUser;
       if (currentUser == null) return null;
 
       final prefs = await SharedPreferences.getInstance();
       final nickname = prefs.getString('user_nickname') ?? 'Anonymous';
       final avatar = prefs.getString('user_avatar') ?? '👤';
 
-      final userDoc = await _firestore
+      final userDoc = await _firestore!
           .collection(_usersCollection)
           .doc(currentUser.uid)
           .get();
@@ -38,7 +70,7 @@ class CommunityService {
           isOnline: true,
         );
 
-        await _firestore
+        await _firestore!
             .collection(_usersCollection)
             .doc(currentUser.uid)
             .set(communityUser.toMap());
@@ -59,10 +91,12 @@ class CommunityService {
   // Update user online status
   static Future<void> updateUserOnlineStatus(bool isOnline) async {
     try {
-      final currentUser = _auth.currentUser;
+      if (!isFirebaseAvailable || _auth == null || _firestore == null) return;
+      
+      final currentUser = _auth!.currentUser;
       if (currentUser == null) return;
 
-      await _firestore.collection(_usersCollection).doc(currentUser.uid).update({
+      await _firestore!.collection(_usersCollection).doc(currentUser.uid).update({
         'isOnline': isOnline,
         'lastSeen': DateTime.now().toIso8601String(),
       });
@@ -74,7 +108,12 @@ class CommunityService {
   // Send a message to the community
   static Future<bool> sendMessage(String content, {String? replyToId}) async {
     try {
-      final currentUser = _auth.currentUser;
+      if (!isFirebaseAvailable || _auth == null || _firestore == null) {
+        print('Firebase not available, cannot send message');
+        throw Exception('Community features are not available without Firebase configuration');
+      }
+      
+      final currentUser = _auth!.currentUser;
       if (currentUser == null) return false;
 
       // Check user moderation status
@@ -125,13 +164,13 @@ class CommunityService {
         isModerated: moderationResult.requiresReview,
       );
 
-      await _firestore
+      await _firestore!
           .collection(_messagesCollection)
           .doc(messageId)
           .set(message.toMap());
 
       // Update user message count
-      await _firestore.collection(_usersCollection).doc(currentUser.uid).update({
+      await _firestore!.collection(_usersCollection).doc(currentUser.uid).update({
         'messageCount': FieldValue.increment(1),
         'lastSeen': DateTime.now().toIso8601String(),
       });
@@ -158,7 +197,7 @@ class CommunityService {
 
   // Get real-time stream of community messages
   static Stream<List<CommunityMessage>> getMessagesStream() {
-    return _firestore
+    return _firestore!
         .collection(_messagesCollection)
         .where('isModerated', isEqualTo: false)
         .orderBy('timestamp', descending: true)
@@ -177,7 +216,11 @@ class CommunityService {
     int limit = 20,
   }) async {
     try {
-      Query query = _firestore
+      if (!isFirebaseAvailable || _firestore == null) {
+        return [];
+      }
+      
+      Query query = _firestore!
           .collection(_messagesCollection)
           .where('isModerated', isEqualTo: false)
           .orderBy('timestamp', descending: true)
@@ -200,7 +243,11 @@ class CommunityService {
   // Get a specific message by ID (for reply context)
   static Future<CommunityMessage?> getMessageById(String messageId) async {
     try {
-      final doc = await _firestore
+      if (!isFirebaseAvailable || _firestore == null) {
+        return null;
+      }
+      
+      final doc = await _firestore!
           .collection(_messagesCollection)
           .doc(messageId)
           .get();
@@ -218,23 +265,27 @@ class CommunityService {
   // React to a message
   static Future<bool> reactToMessage(String messageId, String reactionType) async {
     try {
-      final currentUser = _auth.currentUser;
+      if (!isFirebaseAvailable || _auth == null || _firestore == null) {
+        return false;
+      }
+      
+      final currentUser = _auth!.currentUser;
       if (currentUser == null) return false;
 
       final reactionId = '${messageId}_${currentUser.uid}_$reactionType';
       
       // Check if reaction already exists
-      final existingReaction = await _firestore
+      final existingReaction = await _firestore!
           .collection(_reactionsCollection)
           .doc(reactionId)
           .get();
 
       if (existingReaction.exists) {
         // Remove reaction if it exists
-        await _firestore.collection(_reactionsCollection).doc(reactionId).delete();
+        await _firestore!.collection(_reactionsCollection).doc(reactionId).delete();
         
         // Update message reactions count
-        await _firestore.collection(_messagesCollection).doc(messageId).update({
+        await _firestore!.collection(_messagesCollection).doc(messageId).update({
           'reactions': FieldValue.arrayRemove([currentUser.uid])
         });
       } else {
@@ -247,26 +298,26 @@ class CommunityService {
           timestamp: DateTime.now(),
         );
 
-        await _firestore
+        await _firestore!
             .collection(_reactionsCollection)
             .doc(reactionId)
             .set(reaction.toMap());
 
         // Update message reactions count
-        await _firestore.collection(_messagesCollection).doc(messageId).update({
+        await _firestore!.collection(_messagesCollection).doc(messageId).update({
           'reactions': FieldValue.arrayUnion([currentUser.uid])
         });
 
         // If it's a helpful reaction, increment user's helpful count
         if (reactionType == 'helpful') {
-          final messageDoc = await _firestore
+          final messageDoc = await _firestore!
               .collection(_messagesCollection)
               .doc(messageId)
               .get();
           
           if (messageDoc.exists) {
             final message = CommunityMessage.fromMap(messageDoc.data()!);
-            await _firestore.collection(_usersCollection).doc(message.userId).update({
+            await _firestore!.collection(_usersCollection).doc(message.userId).update({
               'helpfulCount': FieldValue.increment(1),
             });
           }
@@ -283,17 +334,21 @@ class CommunityService {
   // Report a message
   static Future<bool> reportMessage(String messageId, String reason) async {
     try {
-      final currentUser = _auth.currentUser;
+      if (!isFirebaseAvailable || _auth == null || _firestore == null) {
+        return false;
+      }
+      
+      final currentUser = _auth!.currentUser;
       if (currentUser == null) return false;
 
       // Mark message as reported
-      await _firestore.collection(_messagesCollection).doc(messageId).update({
+      await _firestore!.collection(_messagesCollection).doc(messageId).update({
         'isReported': true,
       });
 
       // Create report document
       final reportId = const Uuid().v4();
-      await _firestore.collection('message_reports').doc(reportId).set({
+      await _firestore!.collection('message_reports').doc(reportId).set({
         'id': reportId,
         'messageId': messageId,
         'reportedBy': currentUser.uid,
@@ -311,7 +366,7 @@ class CommunityService {
 
   // Get online users count
   static Stream<int> getOnlineUsersCount() {
-    return _firestore
+    return _firestore!
         .collection(_usersCollection)
         .where('isOnline', isEqualTo: true)
         .snapshots()
@@ -321,7 +376,11 @@ class CommunityService {
   // Get user reactions for a message
   static Future<List<MessageReaction>> getMessageReactions(String messageId) async {
     try {
-      final snapshot = await _firestore
+      if (!isFirebaseAvailable || _firestore == null) {
+        return [];
+      }
+      
+      final snapshot = await _firestore!
           .collection(_reactionsCollection)
           .where('messageId', isEqualTo: messageId)
           .get();
@@ -338,10 +397,14 @@ class CommunityService {
   // Delete user's own message
   static Future<bool> deleteMessage(String messageId) async {
     try {
-      final currentUser = _auth.currentUser;
+      if (!isFirebaseAvailable || _auth == null || _firestore == null) {
+        return false;
+      }
+      
+      final currentUser = _auth!.currentUser;
       if (currentUser == null) return false;
 
-      final messageDoc = await _firestore
+      final messageDoc = await _firestore!
           .collection(_messagesCollection)
           .doc(messageId)
           .get();
@@ -351,15 +414,15 @@ class CommunityService {
         
         // Only allow user to delete their own messages
         if (message.userId == currentUser.uid) {
-          await _firestore.collection(_messagesCollection).doc(messageId).delete();
+          await _firestore!.collection(_messagesCollection).doc(messageId).delete();
           
           // Also delete associated reactions
-          final reactions = await _firestore
+          final reactions = await _firestore!
               .collection(_reactionsCollection)
               .where('messageId', isEqualTo: messageId)
               .get();
           
-          final batch = _firestore.batch();
+          final batch = _firestore!.batch();
           for (var doc in reactions.docs) {
             batch.delete(doc.reference);
           }
@@ -387,9 +450,13 @@ class CommunityService {
   // Search messages by content
   static Future<List<CommunityMessage>> searchMessages(String query) async {
     try {
+      if (!isFirebaseAvailable || _firestore == null) {
+        return [];
+      }
+      
       // Note: Firestore doesn't support full-text search directly
       // This is a basic implementation. For production, consider using Algolia or similar
-      final snapshot = await _firestore
+      final snapshot = await _firestore!
           .collection(_messagesCollection)
           .where('isModerated', isEqualTo: false)
           .orderBy('timestamp', descending: true)

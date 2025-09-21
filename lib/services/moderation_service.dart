@@ -1,9 +1,35 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class ModerationService {
-  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static FirebaseFirestore? get _firestore {
+    try {
+      return FirebaseFirestore.instance;
+    } catch (e) {
+      print('Firebase not initialized: $e');
+      return null;
+    }
+  }
+  
+  static FirebaseAuth? get _auth {
+    try {
+      return FirebaseAuth.instance;
+    } catch (e) {
+      print('Firebase Auth not initialized: $e');
+      return null;
+    }
+  }
+
+  // Check if Firebase is available
+  static bool get isFirebaseAvailable {
+    try {
+      Firebase.apps.isNotEmpty;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   // Prohibited words and phrases for basic content filtering
   static const List<String> _prohibitedWords = [
@@ -87,11 +113,16 @@ class ModerationService {
   // Check user posting behavior for spam detection
   static Future<bool> checkUserBehavior(String userId) async {
     try {
+      if (!isFirebaseAvailable || _firestore == null) {
+        // If Firebase is not available, allow posting
+        return true;
+      }
+      
       final now = DateTime.now();
       final oneHourAgo = now.subtract(const Duration(hours: 1));
       
       // Check message frequency in last hour
-      final recentMessages = await _firestore
+      final recentMessages = await _firestore!
           .collection('community_messages')
           .where('userId', isEqualTo: userId)
           .where('timestamp', isGreaterThan: oneHourAgo.toIso8601String())
@@ -127,7 +158,9 @@ class ModerationService {
   // Flag user for spam behavior
   static Future<void> _flagUserForSpam(String userId, String reason) async {
     try {
-      await _firestore.collection('user_flags').add({
+      if (!isFirebaseAvailable || _firestore == null) return;
+      
+      await _firestore!.collection('user_flags').add({
         'userId': userId,
         'reason': reason,
         'timestamp': DateTime.now().toIso8601String(),
@@ -142,7 +175,9 @@ class ModerationService {
   // Report user action for analytics
   static Future<void> logModerationAction(String action, String userId, {Map<String, dynamic>? details}) async {
     try {
-      await _firestore.collection('moderation_logs').add({
+      if (!isFirebaseAvailable || _firestore == null) return;
+      
+      await _firestore!.collection('moderation_logs').add({
         'action': action,
         'userId': userId,
         'timestamp': DateTime.now().toIso8601String(),
@@ -156,8 +191,13 @@ class ModerationService {
   // Get user's moderation status
   static Future<UserModerationStatus> getUserModerationStatus(String userId) async {
     try {
+      if (!isFirebaseAvailable || _firestore == null) {
+        // If Firebase is not available, assume user is in good standing
+        return UserModerationStatus.good;
+      }
+      
       // Check if user is banned
-      final userDoc = await _firestore
+      final userDoc = await _firestore!
           .collection('community_users')
           .doc(userId)
           .get();
@@ -175,7 +215,7 @@ class ModerationService {
       }
       
       // Check recent flags
-      final recentFlags = await _firestore
+      final recentFlags = await _firestore!
           .collection('user_flags')
           .where('userId', isEqualTo: userId)
           .where('status', isEqualTo: 'pending_review')

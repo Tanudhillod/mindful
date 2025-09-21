@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:666592936525:android:519a88587252507bc2d204",
         "android_client_info": {
-          "package_name": "com.mindful.app"
+          "package_name": "com.example.mindful"
         }
       },
       "oauth_client": [],

@@ -27,6 +27,7 @@ dependencies:
   google_generative_ai: ^0.2.2
   uuid: ^4.2.1
   timeago: ^3.5.0
+  connectivity_plus: ^5.0.2
 
 dev_dependencies:
   flutter_test:

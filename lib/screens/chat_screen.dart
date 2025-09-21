@@ -4,6 +4,7 @@ import '../theme.dart';
 import '../services/gemini_service.dart';
 import '../models/chat_models.dart';
 import '../widgets/emergency_dialog.dart';
+import 'network_diagnostics_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -19,6 +20,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final List<String> _conversationHistory = [];
   
   bool _isTyping = false;
+  bool _isConnected = true; // Track AI connection status
   late AnimationController _typingAnimationController;
   String? _userNickname;
 
@@ -59,7 +61,23 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     });
   }
 
-  void _initializeChat() {
+  Future<void> _checkConnectionStatus() async {
+    try {
+      // Try a quick test to see if Gemini is accessible
+      final testResponse = await GeminiService.generateEmpathicResponse("test");
+      setState(() {
+        _isConnected = !testResponse.contains("having trouble connecting");
+      });
+    } catch (e) {
+      setState(() {
+        _isConnected = false;
+      });
+    }
+  }
+
+  void _initializeChat() async {
+    await _checkConnectionStatus();
+    
     // Add welcome message
     final welcomeMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -98,19 +116,38 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     _conversationHistory.add("User: $message");
 
     try {
-      // Check for crisis
-      final crisisAnalysis = await GeminiService.analyzeCrisisRisk(message);
-      final riskLevel = crisisAnalysis['riskLevel'] as double;
-      
-      if (riskLevel > 0.7) {
-        _showCrisisSupport(crisisAnalysis);
-      }
-
-      // Generate AI response
+      // Generate AI response first to check connectivity
       final aiResponse = await GeminiService.generateEmpathicResponse(
         message,
         conversationHistory: _conversationHistory,
       );
+
+      // Check if response indicates network issues and update status
+      final hasNetworkIssue = aiResponse.contains("having trouble connecting") || 
+                              aiResponse.contains("connection issues") ||
+                              aiResponse.contains("technical difficulties");
+      
+      setState(() {
+        _isConnected = !hasNetworkIssue;
+      });
+
+      // Check for crisis (with fallback if offline)
+      double riskLevel = 0.0;
+      try {
+        final crisisAnalysis = await GeminiService.analyzeCrisisRisk(message);
+        riskLevel = crisisAnalysis['riskLevel'] as double;
+        
+        if (riskLevel > 0.7) {
+          _showCrisisSupport(crisisAnalysis);
+        }
+      } catch (e) {
+        // Fallback crisis detection using keywords
+        final crisisKeywords = ['suicide', 'kill myself', 'end it all', 'hopeless', 'worthless'];
+        if (crisisKeywords.any((keyword) => message.toLowerCase().contains(keyword))) {
+          riskLevel = 0.8;
+          _showCrisisSupport({'riskLevel': riskLevel, 'reasoning': 'Offline keyword detection'});
+        }
+      }
 
       _conversationHistory.add("Mitra: $aiResponse");
 
@@ -259,6 +296,46 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  // Connection status indicator
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NetworkDiagnosticsScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _isConnected 
+                          ? Colors.green.withOpacity(0.1)
+                          : Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _isConnected ? Icons.cloud_done : Icons.cloud_off,
+                            color: _isConnected ? Colors.green : Colors.orange,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _isConnected ? 'Online' : 'Offline',
+                            style: TextStyle(
+                              color: _isConnected ? Colors.green : Colors.orange,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   GestureDetector(

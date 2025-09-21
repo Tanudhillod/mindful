@@ -72,21 +72,31 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
     try {
       setState(() => _isLoading = true);
       
-      final snapshot = await FirebaseFirestore.instance
-          .collection('community_messages')
-          .where('isModerated', isEqualTo: false)
-          .orderBy('timestamp', descending: true)
-          .limit(20)
-          .get();
-      
-      _lastDocument = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
-      
-      setState(() {
-        _messages = snapshot.docs
-            .map((doc) => CommunityMessage.fromMap(doc.data()))
-            .toList();
-        _isLoading = false;
-      });
+      // Check if Firebase is available
+      try {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('community_messages')
+            .where('isModerated', isEqualTo: false)
+            .orderBy('timestamp', descending: true)
+            .limit(20)
+            .get();
+        
+        _lastDocument = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+        
+        setState(() {
+          _messages = snapshot.docs
+              .map((doc) => CommunityMessage.fromMap(doc.data()))
+              .toList();
+          _isLoading = false;
+        });
+      } catch (firebaseError) {
+        // Firebase not available, show empty state
+        setState(() {
+          _messages = [];
+          _isLoading = false;
+        });
+        print('Firebase not available for loading messages: $firebaseError');
+      }
     } catch (e) {
       print('Error loading messages: $e');
       setState(() {
@@ -122,23 +132,28 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
     setState(() => _isLoadingMore = true);
     
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('community_messages')
-          .where('isModerated', isEqualTo: false)
-          .orderBy('timestamp', descending: true)
-          .startAfterDocument(_lastDocument!)
-          .limit(20)
-          .get();
-      
-      if (snapshot.docs.isNotEmpty) {
-        _lastDocument = snapshot.docs.last;
-        final newMessages = snapshot.docs
+      // Check if Firebase is available
+      try {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('community_messages')
+            .where('isModerated', isEqualTo: false)
+            .orderBy('timestamp', descending: true)
+            .startAfterDocument(_lastDocument!)
+            .limit(20)
+            .get();
+        
+        if (snapshot.docs.isNotEmpty) {
+          _lastDocument = snapshot.docs.last;
+          final newMessages = snapshot.docs
             .map((doc) => CommunityMessage.fromMap(doc.data()))
             .toList();
         
-        setState(() {
-          _messages.addAll(newMessages);
-        });
+          setState(() {
+            _messages.addAll(newMessages);
+          });
+        }
+      } catch (firebaseError) {
+        print('Firebase not available for loading more messages: $firebaseError');
       }
     } catch (e) {
       print('Error loading more messages: $e');
@@ -280,6 +295,54 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    // Check if Firebase is available
+    if (!CommunityService.isFirebaseAvailable) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Community Support'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.cloud_off,
+                  size: 64,
+                  color: Theme.of(context).primaryColor.withOpacity(0.6),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Community Features Unavailable',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Community features require Firebase configuration. Please check your network connection or try again later.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Go Back'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Column(

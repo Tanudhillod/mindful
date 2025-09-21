@@ -192,8 +192,13 @@ class _CommunityMessageBubbleState extends State<CommunityMessageBubble> with Ti
   }
 
   bool _isOwnMessage() {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    return currentUser?.uid == widget.message.userId;
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      return currentUser?.uid == widget.message.userId;
+    } catch (e) {
+      // Firebase not available, assume not own message
+      return false;
+    }
   }
 
   void _confirmDelete() {
