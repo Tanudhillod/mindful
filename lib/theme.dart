@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   // Calming pastel colors inspired by nature
@@ -39,8 +38,7 @@ ThemeData get appTheme => ThemeData(
   scaffoldBackgroundColor: AppColors.lightMint,
   cardColor: AppColors.cardBackground,
   
-  textTheme: GoogleFonts.poppinsTextTheme(
-    const TextTheme(
+  textTheme: const TextTheme(
       headlineLarge: TextStyle(
         fontSize: 32, 
         fontWeight: FontWeight.w600, 
@@ -81,7 +79,6 @@ ThemeData get appTheme => ThemeData(
         color: AppColors.textLight,
       ),
     ),
-  ),
   
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
@@ -109,7 +106,7 @@ ThemeData get appTheme => ThemeData(
     backgroundColor: Colors.transparent,
     elevation: 0,
     iconTheme: const IconThemeData(color: AppColors.textDark),
-    titleTextStyle: GoogleFonts.poppins(
+    titleTextStyle: const TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.w600,
       color: AppColors.textDark,

@@ -9,86 +9,87 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
-              Expanded(
-                flex: 3,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Hero illustration placeholder
-                    Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.primaryGreen.withOpacity(0.2),
-                            AppColors.primaryBlue.withOpacity(0.2),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(100),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+              
+              // Hero section
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Hero illustration placeholder
+                  Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.primaryGreen.withOpacity(0.2),
+                          AppColors.primaryBlue.withOpacity(0.2),
+                        ],
                       ),
-                      child: const Icon(
-                        Icons.favorite_rounded,
-                        size: 80,
-                        color: AppColors.primaryGreen,
-                      ),
+                      borderRadius: BorderRadius.circular(100),
                     ),
-                    const SizedBox(height: 40),
-                    
-                    Text(
-                      'Welcome to Mindful',
-                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: AppColors.textDark,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      textAlign: TextAlign.center,
+                    child: const Icon(
+                      Icons.favorite_rounded,
+                      size: 80,
+                      color: AppColors.primaryGreen,
                     ),
-                    const SizedBox(height: 16),
-                    
-                    Text(
-                      'Your confidential AI companion for mental wellness. Get empathetic support, track your mood, and access resources - all completely anonymous.',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.textMedium,
-                        height: 1.6,
-                      ),
-                      textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 40),
+                  
+                  Text(
+                    'Welcome to Mindful',
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w700,
                     ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  Text(
+                    'Your confidential AI companion for mental wellness. Get empathetic support, track your mood, and access resources - all completely anonymous.',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.textMedium,
+                      height: 1.6,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
               
+              SizedBox(height: MediaQuery.of(context).size.height * 0.08),
+              
               // Features highlights
-              Expanded(
-                flex: 2,
-                child: Column(
-                  children: [
-                    _buildFeature(
-                      context,
-                      Icons.lock_outline,
-                      'Complete Privacy',
-                      'No personal data required. Stay completely anonymous.',
-                    ),
-                    const SizedBox(height: 20),
-                    _buildFeature(
-                      context,
-                      Icons.psychology_outlined,
-                      'AI Companion',
-                      'Empathetic AI trained for youth mental wellness.',
-                    ),
-                    const SizedBox(height: 20),
-                    _buildFeature(
-                      context,
-                      Icons.language_outlined,
-                      'Your Language',
-                      'Chat in English, Hindi, or your regional language.',
-                    ),
-                  ],
-                ),
+              Column(
+                children: [
+                  _buildFeature(
+                    context,
+                    Icons.lock_outline,
+                    'Complete Privacy',
+                    'No personal data required. Stay completely anonymous.',
+                  ),
+                  const SizedBox(height: 20),
+                  _buildFeature(
+                    context,
+                    Icons.psychology_outlined,
+                    'AI Companion',
+                    'Empathetic AI trained for youth mental wellness.',
+                  ),
+                  const SizedBox(height: 20),
+                  _buildFeature(
+                    context,
+                    Icons.language_outlined,
+                    'Your Language',
+                    'Chat in English, Hindi, or your regional language.',
+                  ),
+                ],
               ),
+              
+              SizedBox(height: MediaQuery.of(context).size.height * 0.08),
               
               // Get Started Button
               SizedBox(
@@ -127,7 +128,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               
               Text(
                 'By continuing, you agree that all conversations are confidential and anonymous.',
@@ -136,6 +137,7 @@ class WelcomeScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
             ],
           ),
         ),

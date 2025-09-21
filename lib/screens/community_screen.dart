@@ -89,16 +89,24 @@ class _CommunityScreenState extends State<CommunityScreen> with TickerProviderSt
       });
     } catch (e) {
       print('Error loading messages: $e');
-      setState(() => _isLoading = false);
+      setState(() {
+        _messages = [];
+        _isLoading = false;
+      });
     }
   }
 
   void _listenToOnlineUsers() {
-    CommunityService.getOnlineUsersCount().listen((count) {
-      if (mounted) {
-        setState(() => _onlineUsersCount = count);
-      }
-    });
+    try {
+      CommunityService.getOnlineUsersCount().listen((count) {
+        if (mounted) {
+          setState(() => _onlineUsersCount = count);
+        }
+      });
+    } catch (e) {
+      print('Error initializing community user: $e');
+      setState(() => _onlineUsersCount = 0);
+    }
   }
 
   void _onScroll() {
