@@ -6,6 +6,7 @@ class FeatureCard extends StatelessWidget {
   final String title;
   final String description;
   final String buttonText;
+  final VoidCallback? onTap;
 
   const FeatureCard({
     super.key,
@@ -13,6 +14,7 @@ class FeatureCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.buttonText,
+    this.onTap,
   });
 
   @override
@@ -21,23 +23,52 @@ class FeatureCard extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             CircleAvatar(
+              radius: 20,
               backgroundColor: AppColors.lightBlue,
-              child: Icon(icon, color: AppColors.primaryPurple),
+              child: Icon(icon, color: AppColors.primaryPurple, size: 20),
             ),
-            const SizedBox(height: 8),
-            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Text(
+              title, 
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
             const SizedBox(height: 4),
-            Text(description, textAlign: TextAlign.center, style: const TextStyle(fontSize: 14, color: AppColors.textLight)),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppColors.primaryPurple, elevation: 0),
-              child: Text(buttonText),
+            Expanded(
+              child: Text(
+                description, 
+                textAlign: TextAlign.center, 
+                style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 6),
+            SizedBox(
+              width: double.infinity,
+              height: 32,
+              child: ElevatedButton(
+                onPressed: onTap,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white, 
+                  foregroundColor: AppColors.primaryPurple, 
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                ),
+                child: Text(
+                  buttonText,
+                  style: const TextStyle(fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
           ],
         ),

@@ -1,5 +1,5 @@
-name: mindful_app
-description: A Flutter replica of the Mindful mental wellness web app.
+name: mindful
+description: An AI-powered, confidential, and empathetic youth mental wellness solution for India.
 
 publish_to: 'none'
 
@@ -11,10 +11,30 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cupertino_icons: ^1.0.2
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.3
+  cloud_firestore: ^4.13.6
+  firebase_analytics: ^10.7.4
+  firebase_storage: ^11.5.6
+  shared_preferences: ^2.2.2
+  http: ^1.1.0
+  intl: ^0.18.1
+  table_calendar: ^3.0.9
+  fl_chart: ^0.65.0
+  google_fonts: ^6.1.0
+  flutter_secure_storage: ^9.0.0
+  google_generative_ai: ^0.2.2
+  uuid: ^4.2.1
+  timeago: ^3.5.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/

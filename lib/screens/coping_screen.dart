@@ -28,10 +28,11 @@ class CopingScreen extends StatelessWidget {
                   const Text('If you\'re in crisis, reach out for professional help immediately'),
                   const SizedBox(height: 16),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       CopingToolCard(icon: Icons.alarm, title: 'Crisis Hotline', description: '24/7 Support'),
+                      const SizedBox(width: 8),
                       CopingToolCard(icon: Icons.chat, title: 'Text Support Chat', description: 'Anonymous Chat'),
+                      const SizedBox(width: 8),
                       CopingToolCard(icon: Icons.local_hospital, title: 'Emergency', description: 'Call 911'),
                     ],
                   ),
@@ -40,9 +41,9 @@ class CopingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 CopingToolCard(icon: Icons.air, title: 'Breathing Exercises', description: 'Calm your nervous system with guided breathing'),
+                SizedBox(width: 8),
                 CopingToolCard(icon: Icons.book, title: 'Journal Prompts', description: 'CBT-inspired questions for self-reflection'),
               ],
             ),

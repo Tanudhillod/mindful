@@ -18,12 +18,14 @@ class ChallengesScreen extends StatelessWidget {
             const Text('Build healthy habits through gamified challenges designed to support your mental wellness journey', style: TextStyle(fontSize: 16, color: AppColors.textLight)),
             const SizedBox(height: 24),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _statCard('1', 'Completed', Icons.check_circle_outline),
-                _statCard('2', 'Active', Icons.play_circle_outline),
-                _statCard('2', 'Badges', Icons.badge),
-                _statCard('247', 'Points', Icons.star_outline),
+                Expanded(child: _statCard('1', 'Completed', Icons.check_circle_outline)),
+                const SizedBox(width: 8),
+                Expanded(child: _statCard('2', 'Active', Icons.play_circle_outline)),
+                const SizedBox(width: 8),
+                Expanded(child: _statCard('2', 'Badges', Icons.badge)),
+                const SizedBox(width: 8),
+                Expanded(child: _statCard('247', 'Points', Icons.star_outline)),
               ],
             ),
             const SizedBox(height: 24),
@@ -74,10 +76,22 @@ class ChallengesScreen extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: AppColors.primaryPurple),
-            Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Text(label),
+            Icon(icon, color: AppColors.primaryPurple, size: 20),
+            const SizedBox(height: 4),
+            Text(
+              value, 
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 10),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),

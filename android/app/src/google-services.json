@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "666592936525",
+    "project_id": "mindful-7f366",
+    "storage_bucket": "mindful-7f366.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:666592936525:android:519a88587252507bc2d204",
+        "android_client_info": {
+          "package_name": "com.mindful.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZlf6pNS9EAvEEenDBat8E_w-JliSmnIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
